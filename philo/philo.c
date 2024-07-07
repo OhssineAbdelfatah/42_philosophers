@@ -35,7 +35,7 @@ int parse_input(char **input ,t_in *in ,int ac)
     return 0;
 }
 
-int main(int ac , char *av[])
+int main_(int ac , char *av[])
 {
     //           0      1                       2          3             4            [5]
    // input : ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
@@ -57,4 +57,26 @@ int main(int ac , char *av[])
         write(1 , &"Error nbr args\n", 20);
    }
     return 0;
+}
+
+//!!!!!!!!!!!!!!!!!! AFTER YOU FINICH DELETE THE _ IN MAIN ABOVE !!!!!!!!!!!!!!!!
+
+void *make_coffe(void *data)
+{
+    (void )data;
+    printf("barista is making coffe ...\n");
+    sleep(2);
+    printf("coffe is ready.\n");
+    return NULL;
+
+}
+
+int main()
+{
+    pthread_t barista_1;
+    pthread_t barista_2;
+
+    pthread_create(&barista_1 , NULL,   make_coffe, NULL);
+    pthread_create(&barista_2 , NULL,   make_coffe, NULL);
+    sleep(5);
 }

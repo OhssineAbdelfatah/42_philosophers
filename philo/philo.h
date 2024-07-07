@@ -3,6 +3,8 @@
 
 #include<unistd.h>
 #include<stdio.h>
+#include<pthread.h>
+
 
 int	ft_atoi(const char *str);
 
