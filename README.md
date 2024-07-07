@@ -1,1 +1,1 @@
-# 42_philosophers
+# 42_minishell
