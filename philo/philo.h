@@ -16,4 +16,13 @@ typedef struct s_in{
     int meals ;
 }t_in;
 
+int is_digit(char *str);
+int parse_input(char **input ,t_in *in ,int ac);
+int philo(t_in in);
+
+int philo(t_in in);
+void *philos_routine(void *data);
+
+
+
 #endif
