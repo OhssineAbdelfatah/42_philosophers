@@ -1,6 +1,6 @@
 #include"philo.h"
 
-int main(int ac , char *av[])
+int main_(int ac , char *av[])
 {
     //           0      1                       2          3             4            [5]
    // input : ./philo number_of_philosophers time_to_die time_to_eat time_to_sleep [number_of_times_each_philosopher_must_eat]
@@ -15,7 +15,7 @@ int main(int ac , char *av[])
 
         // main entry
         philo(in);
-        printf("philo  %d\ndie    %d ms\neat    %d ms\nsleep  %d ms\n[meals %d]\n",in.num_philo,in.t_die,in.t_eat,in.t_sleep,in.meals);
+        // printf("philo  %d\ndie    %d ms\neat    %d ms\nsleep  %d ms\n[meals %d]\n",in.num_philo,in.t_die,in.t_eat,in.t_sleep,in.meals);
    }
    else {
         write(1 , &"Error nbr args\n", 20);
@@ -25,21 +25,18 @@ int main(int ac , char *av[])
 
 int philo(t_in in)
 {
-    pthread_t *philos[in.num_philo];
+    pthread_t philos[in.num_philo];
 
     int  i ;
 
-    i = 0;
-    while(i < in.num_philo)
-    {
-        pthread_create( *(philos+i), NULL, philos_routine, ((void *)(&i)));
-        i++;
-    }
+    i = -1;
+    while(++i < in.num_philo)
+        pthread_create( philos + i, NULL, philos_routine, ((void *)(&i)));
 
     i = 0;
     while(i < in.num_philo)
     {
-        pthread_join( *philos[i], NULL);
+        pthread_join( philos[i], NULL);
         i++;
     }
     return 0;
@@ -49,13 +46,13 @@ void *philos_routine(void *data)
 {
     int *i;
     i = (int *)data;
-    printf("thread %d",*i);
-    usleep(10);
+    usleep(1000);
+    printf("thread %d\n",*i);
     return NULL;
 }
 //!!!!!!!!!!!!!!!!!! AFTER YOU FINICH DELETE THE _ IN MAIN ABOVE !!!!!!!!!!!!!!!!
 
-/* void *make_coffe(void *data)
+void *make_coffe(void *data)
 {
     (void )data;
     printf("barista is making coffe ...\n");
@@ -67,11 +64,14 @@ void *philos_routine(void *data)
 
 int main()
 {
-    pthread_t barista_1;
-    pthread_t barista_2;
+    pthread_t barista_1[500];
 
-    pthread_create(&barista_1 , NULL,   make_coffe, NULL);
-    printf("%ld \n",barista_1->__sig);
-    pthread_create(&barista_2 , NULL,   make_coffe, NULL);
-    sleep(5);
-} */
+    for(int  i =0 ; i < 500 ; i++){
+        pthread_create(i + barista_1 , NULL,   make_coffe, NULL);
+    }
+
+
+    for(int  i =0 ; i < 500 ; i++){
+        pthread_join(barista_1[i] , NULL);
+    }
+}
