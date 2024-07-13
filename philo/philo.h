@@ -16,6 +16,10 @@ typedef struct s_in{
     int meals ;
 }t_in;
 
+typedef struct s_philo{
+    pthread_t thread;
+    int last_eat;
+} t_philo;
 int is_digit(char *str);
 int parse_input(char **input ,t_in *in ,int ac);
 int philo(t_in in);

@@ -51,7 +51,7 @@ void *philos_routine(void *data)
     return NULL;
 }
 //!!!!!!!!!!!!!!!!!! AFTER YOU FINICH DELETE THE _ IN MAIN ABOVE !!!!!!!!!!!!!!!!
-
+/* 
 void *make_coffe(void *data)
 {
     (void )data;
@@ -74,4 +74,4 @@ int main()
     for(int  i =0 ; i < 500 ; i++){
         pthread_join(barista_1[i] , NULL);
     }
-}
+} */

@@ -1,7 +1,8 @@
 CC = cc
 CFLAGS = -Wextra -Werror  -Wall 
 RM = rm -rf
-SRC = philo.c utils.c parse_input.c
+SRC = philo.c utils.c input.c
+
 OBJ = $(SRC:.c=.o)
 NAME = philo
 
