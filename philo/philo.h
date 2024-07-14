@@ -19,7 +19,10 @@ typedef struct s_in{
 typedef struct s_philo{
     pthread_t thread;
     int last_eat;
+    int id;
 } t_philo;
+
+void print_input(t_in in);
 int is_digit(char *str);
 int parse_input(char **input ,t_in *in ,int ac);
 int philo(t_in in);
