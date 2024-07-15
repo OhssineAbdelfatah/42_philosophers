@@ -59,4 +59,10 @@ void *philos_routine(void *data);
 int    think(t_philo *philo);
 int    sleeep(t_philo *philo);
 
+//////////////////////////////////////////////////////////
+//                       UTILS                          //
+//////////////////////////////////////////////////////////
+
+void my_gettime(unsigned long *time);
+
 #endif

@@ -12,10 +12,10 @@
 
 int    think(t_philo *philo)
 {
-    struct timeval time;
-    gettimeofday(&time,NULL);
+    unsigned long time;
+    my_gettime(&time);
     pthread_mutex_lock((philo->print));
-    printf("[%d]: %d is thinking\n",time.tv_usec,philo->id);
+    printf("[%ld]: %d is thinking\n",time,philo->id);
     pthread_mutex_unlock((philo->print));
     return 0;
 }
@@ -26,10 +26,10 @@ int    think(t_philo *philo)
 
 int    sleeep(t_philo *philo){
 
-    struct timeval time;
-    gettimeofday(&time,NULL);
+    unsigned long time;
+    my_gettime(&time);
     pthread_mutex_lock((philo->print));
-    printf("[%d]: %d is sleeping\n",time.tv_usec,philo->id);
+    printf("[%lu]: %d is sleeping\n",time,philo->id);
     pthread_mutex_unlock((philo->print));
     pthread_mutex_lock((philo->sleep));
     usleep(philo->input->t_sleep);
