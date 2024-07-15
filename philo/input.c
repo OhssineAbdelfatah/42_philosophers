@@ -13,17 +13,13 @@ int is_digit(char *str)
     return 0;
 }
 
-int init_input(char **arg, t_in **input)
+static int init_input(char **arg, t_in **input)
 {
-	pthread_mutex_t mutex_print;
-
-	pthread_mutex_init(&mutex_print ,NULL );
 	(*input)->num_philo = ft_atoi(arg[1]);
     (*input)->t_die = ft_atoi(arg[2]);
     (*input)->t_eat = ft_atoi(arg[3]);
     (*input)->t_sleep = ft_atoi(arg[4]) ;
     (*input)->meals  = -1;
-    (*input)->print  = &mutex_print;
 	return 0;
 }
 
@@ -44,7 +40,6 @@ int parse_input(char **input ,t_in *in ,int ac)
 			return -1;
 	}
 	init_input(input, &in);
-
     if(ac == 6 ){
 		if( ft_atoi(input[5]) != -1)
         	in->meals  = ft_atoi(input[5]);

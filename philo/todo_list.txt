@@ -1,6 +1,0 @@
-
-01 - create threads 
-02 - create routine
-
-03 - 
-
