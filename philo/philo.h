@@ -17,7 +17,7 @@ typedef struct s_in{
     int t_eat;
     int t_sleep ;
     int meals ;
-    long start_time;
+    unsigned long start_time;
 }t_in;
 
 //////////////////////////////////////////////////////////

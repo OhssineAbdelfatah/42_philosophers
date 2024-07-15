@@ -14,20 +14,23 @@ int    think(t_philo *philo)
 {
     unsigned long time;
     my_gettime(&time);
+    time = time - philo->input->start_time ; 
     pthread_mutex_lock((philo->print));
-    printf("[%ld]: %d is thinking\n",time,philo->id);
+    printf("[%lu]: %d is thinking\n",time,philo->id);
     pthread_mutex_unlock((philo->print));
     return 0;
 }
 
-/* int    eat(int time){
-
-} */
+int    eat(t_philo *philo)
+{
+    
+}
 
 int    sleeep(t_philo *philo){
 
     unsigned long time;
     my_gettime(&time);
+    time = time - philo->input->start_time ;
     pthread_mutex_lock((philo->print));
     printf("[%lu]: %d is sleeping\n",time,philo->id);
     pthread_mutex_unlock((philo->print));

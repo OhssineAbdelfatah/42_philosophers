@@ -63,9 +63,7 @@ int philo(t_in *input)
     }
     i = -1;
 
-    struct timeval time;
-    gettimeofday(&time,NULL);
-    input->start_time = time.tv_sec;
+    my_gettime(&(input->start_time));
     while(++i < input->num_philo){
         if(pthread_create( &(philo[i]->thread) , NULL, philos_routine, philo[i])!= 0)
             return -1;

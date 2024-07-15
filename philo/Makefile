@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Wextra -Werror  -Wall -fsanitize=thread -pthread
 RM = rm -rf
-SRC = philo.c input.c routine.c
+SRC = philo.c input.c routine.c utils.c
 
 OBJ = $(SRC:.c=.o)
 NAME = philo
