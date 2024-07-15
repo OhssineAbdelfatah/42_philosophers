@@ -21,10 +21,11 @@ int    think(t_philo *philo)
     return 0;
 }
 
-int    eat(t_philo *philo)
-{
-    
-}
+// int    eat(t_philo *philo)
+// {
+//     // behvoir of eathing
+//         // hold the fork
+// }
 
 int    sleeep(t_philo *philo){
 

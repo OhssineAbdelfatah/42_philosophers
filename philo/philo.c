@@ -39,13 +39,23 @@ int philo(t_in *input)
 {
     int  i ;
     t_philo **philo;
-    pthread_mutex_t *print;
-    pthread_mutex_t *sleep;
-    print = malloc(sizeof(pthread_mutex_t));
-    sleep = malloc(sizeof(pthread_mutex_t));
+    t_mtx ** forks;
+    t_mtx *print;
+    t_mtx *sleep;
 
+
+    // init forks
+    forks = init_forks(input->num_philo);
+
+    // assing each philo his left and right forks (address of the n and n+1 mutexs)
+
+    // allcoate and initilaze mutexs
+    sleep = malloc(sizeof(t_mtx));
+    print = malloc(sizeof(t_mtx));
     pthread_mutex_init(print ,NULL);
     pthread_mutex_init(sleep ,NULL);
+
+    // allocate philos struct and fill it
     philo = (t_philo **)malloc(sizeof(t_philo*) * input->num_philo );
     if(!philo)
         return -1;
@@ -64,14 +74,40 @@ int philo(t_in *input)
     i = -1;
 
     my_gettime(&(input->start_time));
+
+    // create threads
     while(++i < input->num_philo){
         if(pthread_create( &(philo[i]->thread) , NULL, philos_routine, philo[i])!= 0)
             return -1;
     }
+
+    // main thread should wait for all the threads
     i = -1;
     while(++i < input->num_philo){
         if(pthread_join( philo[i]->thread , NULL) != 0)
             return -1;
     }
     return 0;
+}
+
+
+t_mtx **init_forks(int num_forks)
+{
+    t_mtx **forks;
+    int i;
+
+    forks = (t_mtx **)malloc(sizeof(t_mtx *)* num_forks);
+    if(!forks)
+        return NULL;
+
+    i = -1;
+    while(++i < num_forks)
+    {
+        forks[i] = (t_mtx *)malloc(sizeof(t_mtx));
+        if(!forks[i])
+            return NULL;
+        pthread_mutex_init(forks[i],NULL );
+    }
+
+    return forks;
 }

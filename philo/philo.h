@@ -7,6 +7,8 @@
 #include<pthread.h>
 #include <sys/time.h>
 
+typedef pthread_mutex_t t_mtx ;
+
 //////////////////////////////////////////////////////////
 //                         INPUT                        //
 //////////////////////////////////////////////////////////
@@ -50,7 +52,9 @@ int parse_input(char **input ,t_in *in ,int ac);
 
 void print_input(t_in in);
 int philo(t_in *in);
+
 void *philos_routine(void *data);
+t_mtx **init_forks(int num_forks);
 
 //////////////////////////////////////////////////////////
 //                       ROUTINE                        //
