@@ -1,7 +1,7 @@
 CC = cc
-CFLAGS = -Wextra -Werror  -Wall 
+CFLAGS = -Wextra -Werror  -Wall -fsanitize=address -g
 RM = rm -rf
-SRC = philo.c input.c
+SRC = philo.c input.c routine.c
 
 OBJ = $(SRC:.c=.o)
 NAME = philo

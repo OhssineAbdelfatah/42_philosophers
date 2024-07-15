@@ -14,7 +14,7 @@ int main(int ac , char *av[])
         }
         // main entry
         print_input(in);
-        philo(in);
+        philo(&in);
         // printf("philo  %d\ndie    %d ms\neat    %d ms\nsleep  %d ms\n[meals %d]\n",in.num_philo,in.t_die,in.t_eat,in.t_sleep,in.meals);
    }
    else {
@@ -30,26 +30,33 @@ int philo(t_in *input)
     t_philo **philo;
     int  i ;
 
-    philo = (pthread_t **)malloc(sizeof(t_philo*) * input->num_philo );
+    philo = (t_philo **)malloc(sizeof(t_philo*) * input->num_philo );
     if(!philo)
         return -1;
-
     i = -1;
     while(++i < input->num_philo)
-        pthread_create( philo + i, NULL, philos_routine, input);
-    
-    i = 0;
-    while(i < input->num_philo)
     {
-        pthread_join( philo[i], NULL);
-        i++;
+        philo[i]->id = i +1 ;
+        // philo[i]->input = input;
+        if(pthread_create( philo[i]->thread , NULL, philos_routine, philo[i]) == -1)
+            return -1;
     }
     return 0;
 }
 
 void *philos_routine(void *data)
 {
-    // cycle of life
+    t_philo *this_philo;
+
+    this_philo = (t_philo *)data;
+    //  cycle of life
+
+    // think
+    //think(this_philo);
+    
+    //  sleep
+    //  eat
+    return NULL;
 }
 //!!!!!!!!!!!!!!!!!! AFTER YOU FINICH DELETE THE _ IN MAIN ABOVE !!!!!!!!!!!!!!!!
 /* 
