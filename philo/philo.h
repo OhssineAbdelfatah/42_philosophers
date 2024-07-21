@@ -7,36 +7,50 @@
 #include<pthread.h>
 #include <sys/time.h>
 
+#define BOLD_RED "\033[1;31m"
+#define BOLD_GREEN "\033[1;31m"
+#define RESET    "\033[0m"
+
 typedef pthread_mutex_t t_mtx ;
+typedef struct s_forks t_fork ;
+typedef struct s_philo t_philo ;
 
 //////////////////////////////////////////////////////////
 //                         INPUT                        //
 //////////////////////////////////////////////////////////
 
-typedef struct s_in{
+typedef struct s_table{
     int num_philo ;
     int t_die;
     int t_eat;
     int t_sleep ;
     int meals ;
     unsigned long start_time;
-}t_in;
+    t_philo *philos;
+    t_fork *forks;
+
+    t_mtx *print;
+    t_mtx *sleep;
+}t_table;
 
 //////////////////////////////////////////////////////////
 //                    PHILOSPHER                        //
 //////////////////////////////////////////////////////////
 
-typedef struct s_philo{
+struct s_forks {
+    t_mtx *fork;
+    int id;
+};
+
+struct s_philo{
+    int id;
     pthread_t thread;
-    pthread_mutex_t *sleep;
-    pthread_mutex_t *print;
-    t_in *input;
+    t_table *table;
     int last_eat;
     long meals_counter;
-    pthread_mutex_t *right_fork;
-    pthread_mutex_t *left_fork;
-    int id;
-} t_philo;
+    int right_fork;
+    int left_fork;
+} ;
 
 //////////////////////////////////////////////////////////
 //                        INPUT                         //
@@ -44,29 +58,34 @@ typedef struct s_philo{
 
 int	ft_atoi(const char *str);
 int is_digit(char *str);
-int parse_input(char **input ,t_in *in ,int ac);
+void parse_input(char **input);
+void error_exit(const char* str);
+
 
 //////////////////////////////////////////////////////////
-//                        PHILO                         //
+//                    INIT DATA                         //
 //////////////////////////////////////////////////////////
 
-void print_input(t_in in);
-int philo(t_in *in);
-
-void *philos_routine(void *data);
-t_mtx **init_forks(int num_forks);
+// void print_input(t_table*table);
+void init_data(t_table *table, char **av);
+void init_forks(t_table **table);
+void assing_forks(t_table **table);
+void    init_philos(t_table **table);
 
 //////////////////////////////////////////////////////////
 //                       ROUTINE                        //
 //////////////////////////////////////////////////////////
 
+void my_usleep(long usec);
+void *philos_routine(void *data);
 int    think(t_philo *philo);
 int    sleeep(t_philo *philo);
+int    eat(t_philo *philo);
 
 //////////////////////////////////////////////////////////
 //                       UTILS                          //
 //////////////////////////////////////////////////////////
 
-void my_gettime(unsigned long *time);
+size_t my_gettime(void);
 
 #endif

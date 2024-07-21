@@ -1,42 +1,74 @@
 #include"philo.h"
 
-// int cycle_of_life(void *input)
-// {
-//     t_in *in ;
-//     in = (t_in *)input;
-//     think();
-//     eat(in->t_eat);
-//     sleeep(in->t_sleep);
-//     return 0;
-// }
+void *philos_routine(void *data)
+{
+    t_philo *this_philo;
+
+    this_philo = (t_philo *)data;
+    //  think sleep eat
+    if(this_philo->id %2 == 0){
+        sleeep(this_philo);
+    }
+
+    while(1)
+    {
+        eat(this_philo);
+        sleeep(this_philo);
+        think(this_philo);
+    }
+    return NULL;
+}
 
 int    think(t_philo *philo)
 {
-    unsigned long time;
-    my_gettime(&time);
-    time = time - philo->input->start_time ; 
-    pthread_mutex_lock((philo->print));
-    printf("[%lu]: %d is thinking\n",time,philo->id);
-    pthread_mutex_unlock((philo->print));
+    printf(BOLD_RED"%zu"RESET" %d is thinking\n",my_gettime() - philo->table->start_time,philo->id);
     return 0;
 }
 
-// int    eat(t_philo *philo)
-// {
-//     // behvoir of eathing
-//         // hold the fork
-// }
+int    eat(t_philo *philo)
+{
+    pthread_mutex_lock(philo->table->forks[philo->right_fork].fork);
+        printf(BOLD_RED"%zu"RESET" %d has taken a fork\n",my_gettime()- philo->table->start_time ,philo->id);
+        
+    pthread_mutex_lock(philo->table->forks[philo->left_fork].fork);
+            printf(BOLD_RED"%zu"RESET" %d has taken a fork\n",my_gettime()- philo->table->start_time,philo->id);
+            printf(BOLD_RED"%zu"RESET" %d is eating\n",my_gettime() - philo->table->start_time,philo->id);
+    
+        
+    pthread_mutex_unlock(philo->table->forks[philo->left_fork].fork);
+    pthread_mutex_unlock(philo->table->forks[philo->right_fork].fork);
+    my_usleep(philo->table->t_eat *1000);
+    return 0;
+    
+}
 
 int    sleeep(t_philo *philo){
 
-    unsigned long time;
-    my_gettime(&time);
-    time = time - philo->input->start_time ;
-    pthread_mutex_lock((philo->print));
-    printf("[%lu]: %d is sleeping\n",time,philo->id);
-    pthread_mutex_unlock((philo->print));
-    pthread_mutex_lock((philo->sleep));
-    usleep(philo->input->t_sleep);
-    pthread_mutex_unlock((philo->sleep));
+    printf(BOLD_RED"%zu"RESET" %d is sleeping\n",my_gettime()- philo->table->start_time,philo->id);
+    my_usleep(philo->table->t_sleep *1000);
     return 0;
 }
+
+void my_usleep(long usec)
+ {
+    struct timeval start, current;
+    long elapsed;
+    long rem;
+
+    gettimeofday(&start, NULL);
+    gettimeofday(&current, NULL);
+    elapsed = (current.tv_sec - start.tv_sec) * 1000000L + (current.tv_usec - start.tv_usec);
+    rem = usec - elapsed;
+
+    if (rem > 1000) 
+        usleep(rem / 2);
+    while (elapsed < usec){
+        gettimeofday(&current, NULL);
+        elapsed = (current.tv_sec - start.tv_sec) * 1000000L + (current.tv_usec - start.tv_usec);
+        rem = usec - elapsed;
+
+        if (rem > 1000) 
+            usleep(rem / 2);
+    }
+}
+

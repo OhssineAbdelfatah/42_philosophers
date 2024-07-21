@@ -2,16 +2,16 @@
 
 int main(int ac , char *av[])
 {
+    t_table table;
    if(ac == 6 || ac == 5){
-        t_in *in;
-        in = (t_in *)malloc(sizeof(t_in));
-        if(parse_input(av, in, ac) == -1) // number of meals included
-        {
-            printf("Error\n");
-            return 0;
-        }
-        print_input(*in); // print input
-        philo(in);
+        // 1 : parse input 
+        parse_input(av);
+        // 2 : init data 
+        init_data(&table, av);
+        // 3 : start the simulation 
+        // start_dinner(&table);
+        // 4 : init data 
+        // clean(&table);
    }
    else {
         printf("./philo philos die eat sleep [meals]\n");
@@ -19,95 +19,105 @@ int main(int ac , char *av[])
     return 0;
 }
 
-// void init_
-
-void *philos_routine(void *data)
+void init_table(t_table *table,char **av)
 {
-    t_philo *this_philo;
-
-    this_philo = (t_philo *)data;
-    //  think sleep eat
-    while(1)
-    {
-        think(this_philo);
-        sleeep(this_philo);
-    }
-    return NULL;
+    table->num_philo = atoi(av[1]);
+    table->t_die = atoi(av[2]);
+    table->t_eat = atoi(av[3]);
+    table->t_sleep = atoi(av[4]);
+    if(av[5])
+        table->meals = atoi(av[5]);
+    return ;
 }
 
-int philo(t_in *input)
+void    init_forks(t_table **table)
+{
+    int i;
+
+    (*table)->forks = (t_fork *)malloc(sizeof(t_fork)* (*table)->num_philo);
+    if(!(*table)->forks)
+        return ;
+    i = -1;
+    while(++i < (*table)->num_philo)
+    {
+        (*table)->forks[i].id = i;
+        (*table)->forks[i].fork = malloc(sizeof(t_mtx));
+        pthread_mutex_init(((*table)->forks[i].fork),NULL);
+    }
+    return ;
+}
+void    init_philos(t_table **table)
+{
+    int i ;
+
+   ( *table)->philos = (t_philo *)malloc(sizeof(t_philo) * ( *table)->num_philo );
+    if(!( *table)->philos)
+        return ;
+    i = -1;
+    while(++i <(*table)->num_philo){
+        ( *table)->philos[i].table = *table ;
+        ( *table)->philos[i].id = i +1 ;
+    }
+    // assing each philo his left and right forks (address of the n and n+1 mutexs)
+}
+
+void init_data(t_table *table, char **av)
 {
     int  i ;
-    t_philo **philo;
-    t_mtx ** forks;
-    t_mtx *print;
-    t_mtx *sleep;
 
+    // init table
+    init_table(table, av);
+
+    // init philos
+    init_philos(&table);
+    
 
     // init forks
-    forks = init_forks(input->num_philo);
+    init_forks(&table);
 
-    // assing each philo his left and right forks (address of the n and n+1 mutexs)
+    // assing forks to philos
+    assing_forks(&table);
 
-    // allcoate and initilaze mutexs
-    sleep = malloc(sizeof(t_mtx));
-    print = malloc(sizeof(t_mtx));
-    pthread_mutex_init(print ,NULL);
-    pthread_mutex_init(sleep ,NULL);
+    table->print = malloc(sizeof(t_mtx));
+    table->sleep = malloc(sizeof(t_mtx));
+    //initilaze mutexs : sleep and print
+    pthread_mutex_init(table->print ,NULL);
+    pthread_mutex_init(table->sleep ,NULL);
 
-    // allocate philos struct and fill it
-    philo = (t_philo **)malloc(sizeof(t_philo*) * input->num_philo );
-    if(!philo)
-        return -1;
-    i = -1;
-    while(++i < input->num_philo){
-        philo[i] = (t_philo *)malloc(sizeof(t_philo));
-        if(!philo[i])
-            return -1;
-        
-        philo[i]->input = input ;
-        philo[i]->id = i +1 ;
-        philo[i]->print = print ;
-        philo[i]->sleep = sleep ;
-
-    }
-    i = -1;
-
-    my_gettime(&(input->start_time));
 
     // create threads
-    while(++i < input->num_philo){
-        if(pthread_create( &(philo[i]->thread) , NULL, philos_routine, philo[i])!= 0)
-            return -1;
+    table->start_time = my_gettime();
+    i = -1;
+    while( ++i < table->num_philo){
+        if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
+            return ;
     }
 
     // main thread should wait for all the threads
     i = -1;
-    while(++i < input->num_philo){
-        if(pthread_join( philo[i]->thread , NULL) != 0)
-            return -1;
+    while(++i < table->num_philo){
+        if(pthread_join( table->philos[i].thread , NULL) != 0)
+            return ;
     }
-    return 0;
+    return ;
 }
 
 
-t_mtx **init_forks(int num_forks)
-{
-    t_mtx **forks;
-    int i;
 
-    forks = (t_mtx **)malloc(sizeof(t_mtx *)* num_forks);
-    if(!forks)
-        return NULL;
+
+void assing_forks(t_table **table)
+{
+    int i ;
 
     i = -1;
-    while(++i < num_forks)
-    {
-        forks[i] = (t_mtx *)malloc(sizeof(t_mtx));
-        if(!forks[i])
-            return NULL;
-        pthread_mutex_init(forks[i],NULL );
+    while(++i < (*table)->num_philo){
+        (*table)->philos[i].right_fork = i ;
+        if(i+1 == (*table)->num_philo)
+            (*table)->philos[i].left_fork = 0 ;
+        else
+            (*table)->philos[i].left_fork = i+1 ;
     }
-
-    return forks;
+    return ;
 }
+
+

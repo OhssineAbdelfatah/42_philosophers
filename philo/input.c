@@ -1,5 +1,11 @@
 #include"philo.h"
 
+void error_exit(const char*str)
+{
+	printf("%s",str);
+	exit(EXIT_FAILURE);
+}
+
 int is_digit(char *str)
 {   
     int i  ;
@@ -13,40 +19,21 @@ int is_digit(char *str)
     return 0;
 }
 
-static int init_input(char **arg, t_in **input)
-{
-	(*input)->num_philo = ft_atoi(arg[1]);
-    (*input)->t_die = ft_atoi(arg[2]);
-    (*input)->t_eat = ft_atoi(arg[3]);
-    (*input)->t_sleep = ft_atoi(arg[4]) ;
-    (*input)->meals  = -1;
-	return 0;
-}
 
-int parse_input(char **input ,t_in *in ,int ac)
+void parse_input(char **input )
 {
     int i ;
 
     i = 0 ;
     while(input[++i])
     {
-        if(is_digit(input[i]) == -1)
-            return -1;
+        if(is_digit(input[i]) == -1 || ft_atoi(input[i]) == -1)
+            error_exit("Error\n");
     }
-	i = 1;
-	while(++i < 5)
-	{
-		if(ft_atoi(input[i]) == -1)
-			return -1;
-	}
-	init_input(input, &in);
-    if(ac == 6 ){
-		if( ft_atoi(input[5]) != -1)
-        	in->meals  = ft_atoi(input[5]);
-		else	
-			return -1;
-	}
-    return 0;
+	if(ft_atoi(input[2]) < 60 || ft_atoi(input[3]) < 60 
+	|| ft_atoi(input[4]) < 60 || ft_atoi(input[1]) > 200 )
+		error_exit("Error\n");
+    return ;
 }
 
 int	ft_atoi(const char *str)
@@ -69,12 +56,12 @@ int	ft_atoi(const char *str)
 	return ((int)result );
 }
 
-void print_input(t_in in){
+void print_input(t_table table){
 	printf("\n-------------------------------\n");
-	printf("number of philos %d\n",in.num_philo);
-	printf("time to die      %d\n",in.t_die);
-	printf("time to eat      %d\n",in.t_eat);
-	printf("time to sleep    %d\n",in.t_sleep);
-	printf("number of meals  %d\n",in.meals);
+	printf("number of philos %d\n",table.num_philo);
+	printf("time to die      %d\n",table.t_die);
+	printf("time to eat      %d\n",table.t_eat);
+	printf("time to sleep    %d\n",table.t_sleep);
+	printf("number of meals  %d\n",table.meals);
 	printf("-------------------------------\n\n");
 }
