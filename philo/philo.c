@@ -27,6 +27,7 @@ void init_table(t_table *table,char **av)
     table->t_sleep = atoi(av[4]);
     if(av[5])
         table->meals = atoi(av[5]);
+    table->stop_state = 0;
     return ;
 }
 
@@ -56,6 +57,9 @@ void    init_philos(t_table **table)
     i = -1;
     while(++i <(*table)->num_philo){
         ( *table)->philos[i].table = *table ;
+        ( *table)->philos[i].last_eat = 0 ;
+        ( *table)->philos[i].die_state = 0 ;
+        ( *table)->philos[i].meals_counter = 0 ;
         ( *table)->philos[i].id = i +1 ;
     }
     // assing each philo his left and right forks (address of the n and n+1 mutexs)
@@ -64,6 +68,16 @@ void    init_philos(t_table **table)
 void init_data(t_table *table, char **av)
 {
     int  i ;
+
+    t_mtx print;
+    t_mtx state;
+
+    table->print = malloc(sizeof(t_mtx));
+    table->state = malloc(sizeof(t_mtx));
+    pthread_mutex_init(&print, NULL);
+    pthread_mutex_init(&state, NULL);
+    table->print = &print;
+    table->state = &state;
 
     // init table
     init_table(table, av);
@@ -78,13 +92,6 @@ void init_data(t_table *table, char **av)
     // assing forks to philos
     assing_forks(&table);
 
-    table->print = malloc(sizeof(t_mtx));
-    table->sleep = malloc(sizeof(t_mtx));
-    //initilaze mutexs : sleep and print
-    pthread_mutex_init(table->print ,NULL);
-    pthread_mutex_init(table->sleep ,NULL);
-
-
     // create threads
     table->start_time = my_gettime();
     i = -1;
@@ -92,13 +99,14 @@ void init_data(t_table *table, char **av)
         if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
             return ;
     }
-
+    
     // main thread should wait for all the threads
     i = -1;
     while(++i < table->num_philo){
-        if(pthread_join( table->philos[i].thread , NULL) != 0)
+        if(pthread_join( table->philos[i].thread, NULL) != 0)
             return ;
     }
+
     return ;
 }
 

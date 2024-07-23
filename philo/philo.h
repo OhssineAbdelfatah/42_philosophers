@@ -25,12 +25,14 @@ typedef struct s_table{
     int t_eat;
     int t_sleep ;
     int meals ;
-    unsigned long start_time;
+    size_t start_time;
+    int stop_state;
     t_philo *philos;
     t_fork *forks;
 
     t_mtx *print;
-    t_mtx *sleep;
+    t_mtx *state;
+
 }t_table;
 
 //////////////////////////////////////////////////////////
@@ -46,7 +48,8 @@ struct s_philo{
     int id;
     pthread_t thread;
     t_table *table;
-    int last_eat;
+    int die_state;
+    size_t last_eat;
     long meals_counter;
     int right_fork;
     int left_fork;
@@ -80,7 +83,9 @@ void my_usleep(long usec);
 void *philos_routine(void *data);
 int    think(t_philo *philo);
 int    sleeep(t_philo *philo);
-int    eat(t_philo *philo);
+int    eat(t_philo **philo);
+void    check_die(t_philo **philo);
+void died(t_philo *philo);
 
 //////////////////////////////////////////////////////////
 //                       UTILS                          //
