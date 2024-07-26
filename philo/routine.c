@@ -26,7 +26,8 @@ int    think(t_philo *philo)
 
 int    eat(t_philo **philo)
 {
-    if(!(*philo)->die_state){
+    if(!(*philo)->die_state)
+    {
         think(*philo);
         pthread_mutex_lock((*philo)->table->forks[(*philo)->right_fork].fork);
             pthread_mutex_lock((*philo)->table->print);
@@ -38,14 +39,11 @@ int    eat(t_philo **philo)
                 printf(BOLD_RED"%zu"RESET" %d has taken a fork\n",my_gettime()- (*philo)->table->start_time,(*philo)->id);
                 printf(BOLD_RED"%zu"RESET" %d is eating\n",my_gettime() - (*philo)->table->start_time,(*philo)->id);
                 pthread_mutex_unlock((*philo)->table->print);        
-
+                (*philo)->last_eat = my_gettime() - (*philo)->table->start_time;
+                my_usleep((*philo)->table->t_eat *1000);
             pthread_mutex_unlock((*philo)->table->forks[(*philo)->left_fork].fork);
-
         pthread_mutex_unlock((*philo)->table->forks[(*philo)->right_fork].fork);
-
-        (*philo)->last_eat = my_gettime() - (*philo)->table->start_time;
         check_die(philo);
-        my_usleep((*philo)->table->t_eat *1000);
     }
     return 0;
     
@@ -65,8 +63,8 @@ int    sleeep(t_philo *philo)
         pthread_mutex_lock(philo->table->print);
         printf(BOLD_RED"%zu"RESET" %d is sleeping\n",my_gettime()- philo->table->start_time,philo->id);
         pthread_mutex_unlock(philo->table->print);
-        check_die(&philo);
         my_usleep(philo->table->t_sleep *1000);
+        check_die(&philo);
     }
     return 0;
 }
@@ -74,7 +72,8 @@ int    sleeep(t_philo *philo)
 void check_die(t_philo **this_philo)
 {   
     pthread_mutex_lock((*this_philo)->table->state);
-    if((my_gettime() - (*this_philo)->last_eat) > (size_t)((*this_philo)->table->t_die)){
+    if((my_gettime() - (*this_philo)->last_eat) > (size_t)((*this_philo)->table->t_die))
+    {
         (*this_philo)->table->stop_state += 1;
         (*this_philo)->die_state = 1;
         if((*this_philo)->table->stop_state == 1)
@@ -89,6 +88,8 @@ void my_usleep(long usec)
     struct timeval start, current;
     long elapsed;
     long rem;
+
+
 
     gettimeofday(&start, NULL);
     gettimeofday(&current, NULL);

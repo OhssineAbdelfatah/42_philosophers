@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Wextra -Werror  -Wall -fsanitize=thread -pthread #-fsanitize=address -g
+CFLAGS = -Wextra -Werror  -Wall #-fsanitize=thread -pthread #-fsanitize=address -g
 RM = rm -rf
 SRC = philo.c input.c routine.c utils.c
 

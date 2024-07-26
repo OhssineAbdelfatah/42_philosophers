@@ -102,8 +102,12 @@ void init_data(t_table *table, char **av)
     
     // main thread should wait for all the threads
     i = -1;
+    while(1){
+        
+    }
+    i = -1;
     while(++i < table->num_philo){
-        if(pthread_join( table->philos[i].thread, NULL) != 0)
+        if(pthread_detach( table->philos[i].thread) != 0)
             return ;
     }
 
