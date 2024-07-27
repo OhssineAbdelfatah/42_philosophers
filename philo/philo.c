@@ -8,8 +8,10 @@ int main(int ac , char *av[])
         parse_input(av);
         // 2 : init data 
         init_data(&table, av);
+
         // 3 : start the simulation 
-        // start_dinner(&table);
+        start_dinner(&table);
+        
         // 4 : init data 
         // clean(&table);
    }
@@ -67,7 +69,6 @@ void    init_philos(t_table **table)
 
 void init_data(t_table *table, char **av)
 {
-    int  i ;
 
     t_mtx print;
     t_mtx state;
@@ -78,21 +79,22 @@ void init_data(t_table *table, char **av)
     pthread_mutex_init(&state, NULL);
     table->print = &print;
     table->state = &state;
-
     // init table
     init_table(table, av);
-
     // init philos
     init_philos(&table);
-    
-
     // init forks
     init_forks(&table);
-
     // assing forks to philos
     assing_forks(&table);
 
-    // create threads
+    return ;
+}
+
+void start_dinner(t_table *table)
+{
+    int  i ;
+
     table->start_time = my_gettime();
     i = -1;
     while( ++i < table->num_philo){
@@ -100,18 +102,29 @@ void init_data(t_table *table, char **av)
             return ;
     }
     
+    // check for dead threads
+    i = 0;
+    while(!table->stop_state){
+        if(my_gettime() - table->philos[i].last_eat > (size_t)table->t_die)
+        {
+            table->stop_state = 1;
+            i = -1 ;
+            while(++i < table->num_philo)
+                table->philos[i].die_state = 1;
+            pthread_mutex_lock(table->print);
+            printf(BOLD_RED"%zu"RESET" %d has died\n",my_gettime() - table->start_time ,table->philos[i].id);
+            pthread_mutex_unlock(table->print);
+            break;
+        }
+        i++;
+    }
+        
     // main thread should wait for all the threads
     i = -1;
-    while(1){
-        
-    }
-    i = -1;
     while(++i < table->num_philo){
-        if(pthread_detach( table->philos[i].thread) != 0)
+        if(pthread_join( table->philos[i].thread, NULL) != 0)
             return ;
     }
-
-    return ;
 }
 
 

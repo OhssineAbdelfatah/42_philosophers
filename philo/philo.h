@@ -75,6 +75,13 @@ void init_forks(t_table **table);
 void assing_forks(t_table **table);
 void    init_philos(t_table **table);
 
+/* 
+    start dinner
+ */
+
+void start_dinner(t_table *table);
+
+
 //////////////////////////////////////////////////////////
 //                       ROUTINE                        //
 //////////////////////////////////////////////////////////
@@ -84,8 +91,9 @@ void *philos_routine(void *data);
 int    think(t_philo *philo);
 int    sleeep(t_philo *philo);
 int    eat(t_philo **philo);
-void    check_die(t_philo **philo);
-void died(t_philo *philo);
+
+// void    check_die(t_philo **philo);
+// void died(t_philo *philo);
 
 //////////////////////////////////////////////////////////
 //                       UTILS                          //
