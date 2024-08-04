@@ -1,23 +1,34 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/04 08:50:01 by aohssine          #+#    #+#             */
+/*   Updated: 2024/08/04 09:11:31 by aohssine         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include"philo.h"
 
 int main(int ac , char *av[])
 {
     t_table table;
-   if(ac == 6 || ac == 5){
+    if(ac == 6 || ac == 5){
         // 1 : parse input 
         parse_input(av);
         // 2 : init data 
         init_data(&table, av);
 
         // 3 : start the simulation 
-        start_dinner(&table);
+        start_dinner(&table); 
         
         // 4 : init data 
         // clean(&table);
-   }
-   else {
+    }
+    else
         printf("./philo philos die eat sleep [meals]\n");
-   }
     return 0;
 }
 
@@ -53,18 +64,17 @@ void    init_philos(t_table **table)
 {
     int i ;
 
-   ( *table)->philos = (t_philo *)malloc(sizeof(t_philo) * ( *table)->num_philo );
-    if(!( *table)->philos)
+   (*table)->philos = (t_philo *)malloc(sizeof(t_philo) * (*table)->num_philo );
+    if(!(*table)->philos)
         return ;
     i = -1;
     while(++i <(*table)->num_philo){
-        ( *table)->philos[i].table = *table ;
-        ( *table)->philos[i].last_eat = 0 ;
-        ( *table)->philos[i].die_state = 0 ;
-        ( *table)->philos[i].meals_counter = 0 ;
-        ( *table)->philos[i].id = i +1 ;
+        (*table)->philos[i].table = *table ;
+        (*table)->philos[i].last_eat = 0;
+        (*table)->philos[i].die_state = 0 ;
+        (*table)->philos[i].meals_counter = 0 ;
+        (*table)->philos[i].id = i +1 ;
     }
-    // assing each philo his left and right forks (address of the n and n+1 mutexs)
 }
 
 void init_data(t_table *table, char **av)
@@ -95,28 +105,32 @@ void start_dinner(t_table *table)
 {
     int  i ;
 
-    table->start_time = my_gettime();
     i = -1;
-    while( ++i < table->num_philo){
-        if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
-            return ;
+    table->start_time = my_gettime();
+    if(table->num_philo > 1 )
+    {
+        while( ++i < table->num_philo){
+            
+            if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
+                return ;
+        }
+    }else {
+        pthread_mutex_lock(table->print);
+        printf(BOLD_GREEN"%zu %d has died\n"RESET,my_gettime()- table->start_time ,table->philos[++i].id);
+        pthread_mutex_unlock(table->print);
     }
     
     // check for dead threads
-    i = 0;
-    while(!table->stop_state){
-        if(my_gettime() - table->philos[i].last_eat > (size_t)table->t_die)
-        {
-            table->stop_state = 1;
-            i = -1 ;
-            while(++i < table->num_philo)
-                table->philos[i].die_state = 1;
-            pthread_mutex_lock(table->print);
-            printf(BOLD_RED"%zu"RESET" %d has died\n",my_gettime() - table->start_time ,table->philos[i].id);
-            pthread_mutex_unlock(table->print);
+    i = -1;
+    while(++i < table->num_philo )
+    {   
+        if((my_gettime() - table->start_time - table->philos[i].last_eat ) > (size_t)table->t_die ){
+            set_state(table);
+            print_value(table->philos[i], BOLD_RED"has died"RESET);
             break;
         }
-        i++;
+        if(i == table->num_philo - 1)
+            i = 0;
     }
         
     // main thread should wait for all the threads

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/04 08:51:55 by aohssine          #+#    #+#             */
+/*   Updated: 2024/08/04 08:51:56 by aohssine         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 #define PHILO_H
 
@@ -8,7 +20,7 @@
 #include <sys/time.h>
 
 #define BOLD_RED "\033[1;31m"
-#define BOLD_GREEN "\033[1;31m"
+#define BOLD_GREEN "\033[1;32m"
 #define RESET    "\033[0m"
 
 typedef pthread_mutex_t t_mtx ;
@@ -86,13 +98,13 @@ void start_dinner(t_table *table);
 //                       ROUTINE                        //
 //////////////////////////////////////////////////////////
 
-void my_usleep(long usec);
+void my_usleep(long usec, t_philo *philo);
 void *philos_routine(void *data);
 int    think(t_philo *philo);
 int    sleeep(t_philo *philo);
 int    eat(t_philo **philo);
 
-// void    check_die(t_philo **philo);
+int    check_die(t_philo *philo);
 // void died(t_philo *philo);
 
 //////////////////////////////////////////////////////////
@@ -100,5 +112,14 @@ int    eat(t_philo **philo);
 //////////////////////////////////////////////////////////
 
 size_t my_gettime(void);
+void print_value(t_philo philo,char *mssg);
+
+/* 
+    GETTERS AND SETTERS 
+*/
+// size_t get_startTime(t_table table);
+
+int get_state(t_table *table);
+void set_state(t_table *table);
 
 #endif
