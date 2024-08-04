@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 08:50:01 by aohssine          #+#    #+#             */
-/*   Updated: 2024/08/04 09:11:31 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/08/04 09:23:31 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,17 +107,10 @@ void start_dinner(t_table *table)
 
     i = -1;
     table->start_time = my_gettime();
-    if(table->num_philo > 1 )
+    while( ++i < table->num_philo)
     {
-        while( ++i < table->num_philo){
-            
-            if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
-                return ;
-        }
-    }else {
-        pthread_mutex_lock(table->print);
-        printf(BOLD_GREEN"%zu %d has died\n"RESET,my_gettime()- table->start_time ,table->philos[++i].id);
-        pthread_mutex_unlock(table->print);
+        if(pthread_create( &(table->philos[i].thread) , NULL, philos_routine, &(table->philos[i])) != 0)
+            return ;
     }
     
     // check for dead threads
@@ -149,6 +142,8 @@ void assing_forks(t_table **table)
     int i ;
 
     i = -1;
+    if((*table)->num_philo == 1)
+        (*table)->philos[i].left_fork = 0 ;
     while(++i < (*table)->num_philo){
         (*table)->philos[i].right_fork = i ;
         if(i+1 == (*table)->num_philo)
