@@ -6,31 +6,11 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 08:50:01 by aohssine          #+#    #+#             */
-/*   Updated: 2024/08/04 09:23:31 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/08/05 11:05:54 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include"philo.h"
-
-int main(int ac , char *av[])
-{
-    t_table table;
-    if(ac == 6 || ac == 5){
-        // 1 : parse input 
-        parse_input(av);
-        // 2 : init data 
-        init_data(&table, av);
-
-        // 3 : start the simulation 
-        start_dinner(&table); 
-        
-        // 4 : init data 
-        // clean(&table);
-    }
-    else
-        printf("./philo philos die eat sleep [meals]\n");
-    return 0;
-}
 
 void init_table(t_table *table,char **av)
 {
@@ -60,6 +40,7 @@ void    init_forks(t_table **table)
     }
     return ;
 }
+
 void    init_philos(t_table **table)
 {
     int i ;
@@ -119,7 +100,7 @@ void start_dinner(t_table *table)
     {   
         if((my_gettime() - table->start_time - table->philos[i].last_eat ) > (size_t)table->t_die ){
             set_state(table);
-            print_value(table->philos[i], BOLD_RED"has died"RESET);
+            print_value(table->philos[i], BOLD_RED"died"RESET);
             break;
         }
         if(i == table->num_philo - 1)
@@ -134,16 +115,13 @@ void start_dinner(t_table *table)
     }
 }
 
-
-
-
 void assing_forks(t_table **table)
 {
     int i ;
 
     i = -1;
-    if((*table)->num_philo == 1)
-        (*table)->philos[i].left_fork = 0 ;
+    // if((*table)->num_philo == 1)
+    //     (*table)->philos[i].left_fork = 0 ;
     while(++i < (*table)->num_philo){
         (*table)->philos[i].right_fork = i ;
         if(i+1 == (*table)->num_philo)
@@ -154,4 +132,22 @@ void assing_forks(t_table **table)
     return ;
 }
 
+int main(int ac , char *av[])
+{
+    t_table table;
+    if(ac == 6 || ac == 5){
+        // 1 : parse input 
+        parse_input(av);
+        // 2 : init data 
+        init_data(&table, av);
 
+        // 3 : start the simulation 
+        start_dinner(&table); 
+        
+        // 4 : init data 
+        // clean(&table);
+    }
+    else
+        printf("./philo philos die eat sleep [meals]\n");
+    return 0;
+}

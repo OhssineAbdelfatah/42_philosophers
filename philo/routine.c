@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 08:50:07 by aohssine          #+#    #+#             */
-/*   Updated: 2024/08/04 09:16:17 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/08/05 16:44:25 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,16 @@ void *philos_routine(void *data)
 
     this_philo = (t_philo *)data;
     //  think sleep eat
-    if(this_philo->id %2 == 0)
-        think(this_philo);
-    while(get_state(((this_philo)->table)) == 0)
+    if(this_philo->id %2 != 0)
+        sleeep(this_philo);
+    while( !get_state(((this_philo)->table)) )
     {
         eat(&this_philo);
-        if(get_state(((this_philo)->table)) != 0)
-            break;
+        // if(get_state(((this_philo)->table)) == 0)
+        //     break;
         sleeep(this_philo);
-        if(get_state(((this_philo)->table)) != 0)
-            break;
+        // if(get_state(((this_philo)->table)) == 0)
+        //     break;
     }
     return NULL;
 }
@@ -45,13 +45,15 @@ int    eat(t_philo **philo)
         think(*philo);
         pthread_mutex_lock((*philo)->table->forks[(*philo)->right_fork].fork);
             print_value(**philo, "has taken a fork");
-            pthread_mutex_lock((*philo)->table->forks[(*philo)->left_fork].fork);
+            if((*philo)->left_fork != (*philo)->right_fork){
+                pthread_mutex_lock((*philo)->table->forks[(*philo)->left_fork].fork);
                 print_value(**philo, "has taken a fork");
                 print_value(**philo, "is eating");   
-                (*philo)->last_eat = my_gettime() - (*philo)->table->start_time;
-                my_usleep((*philo)->table->t_eat *1000, *philo);
                 (*philo)->meals_counter += 1; 
-            pthread_mutex_unlock((*philo)->table->forks[(*philo)->left_fork].fork);
+                (*philo)->last_eat = my_gettime() - (*philo)->table->start_time;
+                my_usleep((*philo)->table->t_eat, *philo);
+                pthread_mutex_unlock((*philo)->table->forks[(*philo)->left_fork].fork);   
+            }
         pthread_mutex_unlock((*philo)->table->forks[(*philo)->right_fork].fork);
     }
     return 0;
@@ -63,7 +65,7 @@ int    sleeep(t_philo *philo)
     if( get_state((philo->table))  == 0)
     {
         print_value(*philo, "is sleeping");   
-        my_usleep(philo->table->t_sleep *1000, philo);
+        my_usleep(philo->table->t_sleep , philo);
     }
     return 0;
 }
@@ -84,7 +86,7 @@ int check_die(t_philo *this_philo)
     if((my_gettime() - this_philo->table->start_time - this_philo->last_eat) > (size_t)(this_philo->table->t_die))
     {
         set_state(this_philo->table);
-        print_value(*this_philo, BOLD_RED"has died"RESET);
+        print_value(*this_philo, BOLD_RED"died"RESET);
         return 0;
     }
     return 1;
@@ -94,14 +96,18 @@ int check_die(t_philo *this_philo)
     hard coded my_usleep
 */
 
-void my_usleep(long usec, t_philo *philo)
+void my_usleep(long msec, t_philo *philo)
 {
     size_t now;
-
-    now = my_gettime();
-    while (my_gettime() - now < (size_t)usec ){
+    size_t tmp;
+    (void)philo;
+    now = my_gettime ();
+    tmp = my_gettime ();
+    while (tmp - now < (size_t)msec )
+    {
         usleep(100);
-        if( check_die(philo) == 0 || get_state((philo->table)) != 0 )
+        tmp = my_gettime();
+        if(get_state((philo->table)) != 0 || check_die(philo) == 0)
             return ;
     }
     return;
