@@ -5,121 +5,173 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/04 08:51:55 by aohssine          #+#    #+#             */
-/*   Updated: 2024/08/05 10:26:58 by aohssine         ###   ########.fr       */
+/*   Created: 2024/09/20 22:14:31 by aohssine          #+#    #+#             */
+/*   Updated: 2024/09/20 22:23:19 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PHILO_H
-#define PHILO_H
-
-#include<unistd.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<pthread.h>
+#include <errno.h>
+#include <limits.h>
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
+#include <unistd.h>
 
-#define BOLD_RED "\033[1;31m"
-#define BOLD_GREEN "\033[1;32m"
-#define RESET    "\033[0m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN "\033[1;36m"
+#define WHITE "\033[1;37m"
+#define BLACK "\033[1;30m"
+#define ORANGE "\033[1;91m"
+#define PURPLE "\033[1;95m"
 
-typedef pthread_mutex_t t_mtx ;
-typedef struct s_forks t_fork ;
-typedef struct s_philo t_philo ;
+#define RESET "\033[0m"
 
-//////////////////////////////////////////////////////////
-//                         INPUT                        //
-//////////////////////////////////////////////////////////
+/***
+ * structures
+ ***/
 
-typedef struct s_table{
-    int num_philo ;
-    int t_die;
-    int t_eat;
-    int t_sleep ;
-    int meals ;
-    size_t start_time;
-    int stop_state;
-    t_philo *philos;
-    t_fork *forks;
-
-    t_mtx *print;
-    t_mtx *state;
-
-}t_table;
-
-//////////////////////////////////////////////////////////
-//                    PHILOSPHER                        //
-//////////////////////////////////////////////////////////
-
-struct s_forks {
-    t_mtx *fork;
-    int id;
-};
-
-struct s_philo{
-    int id;
-    pthread_t thread;
-    t_table *table;
-    int die_state;
-    size_t last_eat;
-    long meals_counter;
-    int right_fork;
-    int left_fork;
-} ;
-
-//////////////////////////////////////////////////////////
-//                        INPUT                         //
-//////////////////////////////////////////////////////////
-
-int	ft_atoi(const char *str);
-int is_digit(char *str);
-void parse_input(char **input);
-void error_exit(const char* str);
-
-
-//////////////////////////////////////////////////////////
-//                    INIT DATA                         //
-//////////////////////////////////////////////////////////
-
-// void print_input(t_table*table);
-void init_data(t_table *table, char **av);
-void init_forks(t_table **table);
-void assing_forks(t_table **table);
-void    init_philos(t_table **table);
-
-/* 
-    start dinner
+typedef pthread_mutex_t	t_mtx;
+typedef struct s_table	t_table;
+/*
+ * FORK
  */
 
-void start_dinner(t_table *table);
+typedef struct s_fork
+{
+	t_mtx				fork;
+	int					fork_id;
+}						t_fork;
 
+/*
+ * PHILO
+ */
 
-//////////////////////////////////////////////////////////
-//                       ROUTINE                        //
-//////////////////////////////////////////////////////////
+typedef struct s_philo
+{
+	int					id;
+	long				meals_counter;
+	bool				full;
+	long				last_meal_time;
+	t_fork				*first_fork;
+	t_fork				*second_fork;
+	pthread_t			thread_id;
+	t_table				*table;
+	t_mtx				philo_mutex;
 
-void my_usleep(long usec, t_philo *philo);
-void *philos_routine(void *data);
-int    think(t_philo *philo);
-int    sleeep(t_philo *philo);
-int    eat(t_philo **philo);
+}						t_philo;
 
-int    check_die(t_philo *philo);
-// void died(t_philo *philo);
+/*
+ * TABLE
+ */
 
-//////////////////////////////////////////////////////////
-//                       UTILS                          //
-//////////////////////////////////////////////////////////
+typedef struct s_table
+{
+	long				num_philo;
+	long				time2die;
+	long				time2eat;
+	long				time2sleep;
+	long				nbr_meals;
+	long				start_dinner;
+	long				thr_running_nbr;
+	bool				end_dinner;
+	pthread_t			monitor;
+	t_mtx				table_mtx;
+	t_mtx				write_mtx;
+	t_fork				*forks;
+	t_philo				*philos;
+	bool				all_thr_ready;
 
-size_t my_gettime(void);
-void print_value(t_philo philo,char *mssg);
+}						t_table;
 
-/* 
-    GETTERS AND SETTERS 
-*/
-// size_t get_startTime(t_table table);
+/***
+ * ENUM
+ ***/
 
-int get_state(t_table *table);
-void set_state(t_table *table);
+typedef enum e_opcode
+{
+	CREATE,
+	DESTROY,
+	INIT,
+	LOCK,
+	UNLOCK,
+	JOIN,
+	DETACH
+}						t_opcode;
 
-#endif
+typedef enum e_status
+{
+	EATING,
+	SLEEPING,
+	THINKING,
+	TAKE_FIRST_FORK,
+	TAKE_SECOND_FORK,
+	DIED
+}						t_status;
+
+typedef enum e_time_code
+{
+	SECOND,
+	MILLISEC,
+	MICROSEC
+}						t_time_code;
+
+/***
+ * PROTOTYPES
+ ***/
+
+void					start_dinner(t_table *table);
+void					data_init(t_table *table);
+void					init_table(t_table *table, char **av);
+
+/*
+	write status
+ */
+void					write_status(t_status status, t_philo *philo);
+
+/*
+	safe functions
+ */
+
+void					*safe_malloc(size_t bytes);
+void					safe_mutex_handel(t_mtx *mutex, t_opcode opcode);
+void					safe_thread_handel(pthread_t *thr, void *(*foo)(void *),
+							void *data, t_opcode opcode);
+
+/*
+	utils
+ */
+
+void					my_usleep(long usec, t_table *table);
+long					gettime(t_time_code tcode);
+void					error_exit(const char *error);
+void					clean(t_table *table);
+/*
+	getters_setters
+ */
+
+void					set_bool(t_mtx *mutex, bool *dest, bool value);
+bool					get_bool(t_mtx *mutex, bool *value);
+void					set_long(t_mtx *mutex, long *dest, long value);
+long					get_long(t_mtx *mutex, long *value);
+bool					simulation_finished(t_table *table);
+bool					all_threads_running(t_mtx *mutex, long *threads,
+							long philo_number);
+void					increase_long(t_mtx *mutex, long *var);
+
+/*
+	monitoring
+ */
+
+void					*monitor_dinner(void *data);
+
+/*
+	syncro
+ */
+
+void					wait_all_threads(t_table *table);

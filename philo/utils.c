@@ -5,62 +5,83 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/04 08:52:04 by aohssine          #+#    #+#             */
-/*   Updated: 2024/08/04 08:52:05 by aohssine         ###   ########.fr       */
+/*   Created: 2024/09/20 22:14:58 by aohssine          #+#    #+#             */
+/*   Updated: 2024/09/20 22:28:33 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include"philo.h"
+#include "philo.h"
 
-size_t my_gettime(void)
+void	clean(t_table *table)
 {
-    struct timeval  t_time;
-    
-    gettimeofday(&t_time, NULL);
-    return t_time.tv_usec /1000  + t_time.tv_sec *  1000;
+	t_philo	*philo;
+	int		i;
 
+	i = -1;
+	while (++i < table->num_philo)
+	{
+		philo = philo + i;
+		safe_mutex_handel(&philo->philo_mutex, DESTROY);
+	}
+	safe_mutex_handel(&table->table_mtx, DESTROY);
+	safe_mutex_handel(&table->write_mtx, DESTROY);
+	free(table->forks);
+	free(table->philos);
 }
 
-void print_value(t_philo philo,char *mssg)
+void	error_exit(const char *error)
 {
-    pthread_mutex_lock(philo.table->print);
-    printf(BOLD_RED"%zu"RESET" %d %s\n",my_gettime()- philo.table->start_time ,philo.id , mssg);
-    pthread_mutex_unlock(philo.table->print);
-}
-/* 
-    setters
- */
-void set_state(t_table *table)
-{
-    pthread_mutex_lock(table->state);
-    table->stop_state = 1;
-    pthread_mutex_unlock(table->state);
+	printf("error : %s\n", error);
+	exit(EXIT_FAILURE);
 }
 
-// void set_meal(t_philo *philo)
-// {
-//     pthread_mutex_lock(table->state);
-//     table->stop_state = 1;
-//     pthread_mutex_unlock(table->state);
-// }
+long	gettime(t_time_code tcode)
+{
+	struct timeval	time;
 
-/*  
-    getters
+	if (gettimeofday(&time, NULL))
+		error_exit("gettimeofday failed\n");
+	if (SECOND == tcode)
+		return (time.tv_usec / 1e6 + time.tv_sec);
+	else if (MILLISEC == tcode)
+		return (time.tv_usec / 1e3 + time.tv_sec * 1e3);
+	else if (MICROSEC == tcode)
+		return (time.tv_usec + time.tv_sec * 1e6);
+	else
+		error_exit("Wrong input to gettime!");
+	return (1337);
+}
+
+/*
+	precise usleep
 */
 
-int get_state(t_table *table)
+void	my_usleep(long usec, t_table *table)
 {
-    int i ;
-    pthread_mutex_lock(table->state);
-    i = table->stop_state;
-    pthread_mutex_unlock(table->state);
-    return i;
+	long	start;
+	long	elapsed;
+	long	rem;
+
+	start = gettime(MICROSEC);
+	while (gettime(MICROSEC) - start < usec)
+	{
+		if (simulation_finished(table))
+			break ;
+		elapsed = gettime(MICROSEC);
+		rem = usec - elapsed;
+		if (rem > 1000)
+			usleep(100);
+		else
+		{
+			while (gettime(MICROSEC) - start < usec)
+				;
+		}
+	}
 }
-// size_t get_startTime(t_table *table)
-// {
-//     size_t i ;
-//     pthread_mutex_lock(table.state);
-//     i = table.start_time;
-//     pthread_mutex_unlock(table.state);
-//     return i;
-// }
+
+void	increase_long(t_mtx *mutex, long *var)
+{
+	safe_mutex_handel(mutex, LOCK);
+	(*var)++;
+	safe_mutex_handel(mutex, UNLOCK);
+}
