@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+         #
+#    By: blacksniper <blacksniper@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/27 10:35:06 by aohssine          #+#    #+#              #
-#    Updated: 2024/11/16 12:06:50 by aohssine         ###   ########.fr        #
+#    Updated: 2024/11/16 11:45:43 by blacksniper      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 

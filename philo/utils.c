@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
+/*   By: blacksniper <blacksniper@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:58 by aohssine          #+#    #+#             */
-/*   Updated: 2024/11/16 12:07:58 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 11:44:42 by blacksniper      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,22 @@
 void	clean(t_table *table)
 {
 	t_philo	*philo;
+	t_fork	*fork;
 	int		i;
 
-	i = -1;
-	while (++i < table->num_philo)
+	i = 0;
+	while (i < table->num_philo)
 	{
-		philo = philo + i;
+		philo = table->philos + i;
 		pthread_mutex_destroy(&philo->philo_mutex);
+		i++;
+	}
+	i = 0 ;
+	while (i < table->num_philo)
+	{
+		fork = table->forks + i;
+		pthread_mutex_destroy(&fork->fork);
+		i++;
 	}
 	pthread_mutex_destroy(&table->table_mtx);
 	pthread_mutex_destroy(&table->write_mtx);
