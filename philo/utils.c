@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:58 by aohssine          #+#    #+#             */
-/*   Updated: 2024/09/20 22:28:33 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 12:07:58 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,14 @@ void	clean(t_table *table)
 	while (++i < table->num_philo)
 	{
 		philo = philo + i;
-		safe_mutex_handel(&philo->philo_mutex, DESTROY);
+		pthread_mutex_destroy(&philo->philo_mutex);
 	}
-	safe_mutex_handel(&table->table_mtx, DESTROY);
-	safe_mutex_handel(&table->write_mtx, DESTROY);
+	pthread_mutex_destroy(&table->table_mtx);
+	pthread_mutex_destroy(&table->write_mtx);
+	// safe_mutex_handel(&table->table_mtx, DESTROY);
+	// safe_mutex_handel(&table->write_mtx, DESTROY);
 	free(table->forks);
 	free(table->philos);
-}
-
-void	error_exit(const char *error)
-{
-	printf("error : %s\n", error);
-	exit(EXIT_FAILURE);
 }
 
 long	gettime(t_time_code tcode)
@@ -40,7 +36,7 @@ long	gettime(t_time_code tcode)
 	struct timeval	time;
 
 	if (gettimeofday(&time, NULL))
-		error_exit("gettimeofday failed\n");
+		return -1;
 	if (SECOND == tcode)
 		return (time.tv_usec / 1e6 + time.tv_sec);
 	else if (MILLISEC == tcode)
@@ -48,13 +44,9 @@ long	gettime(t_time_code tcode)
 	else if (MICROSEC == tcode)
 		return (time.tv_usec + time.tv_sec * 1e6);
 	else
-		error_exit("Wrong input to gettime!");
+		return -1;
 	return (1337);
 }
-
-/*
-	precise usleep
-*/
 
 void	my_usleep(long usec, t_table *table)
 {
@@ -81,7 +73,7 @@ void	my_usleep(long usec, t_table *table)
 
 void	increase_long(t_mtx *mutex, long *var)
 {
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	(*var)++;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 }

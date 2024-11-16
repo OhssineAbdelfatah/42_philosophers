@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:14 by aohssine          #+#    #+#             */
-/*   Updated: 2024/09/20 22:18:31 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 12:10:30 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,35 +14,35 @@
 
 void	set_bool(t_mtx *mutex, bool *dest, bool value)
 {
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	*dest = value;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 }
 
 bool	get_bool(t_mtx *mutex, bool *value)
 {
 	bool	ret;
 
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	ret = *value;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 	return (ret);
 }
 
 void	set_long(t_mtx *mutex, long *dest, long value)
 {
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	*dest = value;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 }
 
 long	get_long(t_mtx *mutex, long *value)
 {
 	long	ret;
 
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	ret = *value;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 	return (ret);
 }
 

@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:28 by aohssine          #+#    #+#             */
-/*   Updated: 2024/10/27 10:34:49 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 09:24:09 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,33 +42,46 @@ static int	is_digit(char *str)
 	return (0);
 }
 
-void	parse_input(char **input)
+int	parse_input(char **input)
 {
 	int	i;
 
 	i = 0;
 	while (input[++i])
 	{
-		if (is_digit(input[i]) == -1 || ft_atoi(input[i]) == -1)
-			error_exit("Integer arg required");
+		if (is_digit(input[i]) == -1 || ft_atoi(input[i]) == -1){
+			printf("Integer arg required\n");
+			return 1;
+		}
+			
 	}
 	if (ft_atoi(input[2]) < 60 || ft_atoi(input[3]) < 60
 		|| ft_atoi(input[4]) < 60 || ft_atoi(input[1]) > 200
 		|| ft_atoi(input[1]) < 1)
-		error_exit("Arg not valid");
-	return ;
+	{
+		printf("Arg not valid\n");
+		return 1;
+	}
+	return 0;
 }
 
-void	init_table(t_table *table, char **av)
+int	init_table(t_table *table, char **av)
 {
-	parse_input(av);
+	if(parse_input(av))
+		return 1;
 	table->num_philo = ft_atoi(av[1]);
 	table->time2die = (long)ft_atoi(av[2]) * 1000;
 	table->time2eat = ft_atoi(av[3]) * 1000;
 	table->time2sleep = ft_atoi(av[4]) * 1000;
 	table->nbr_meals = -1;
 	if (av[5])
+	{
 		table->nbr_meals = ft_atoi(av[5]);
+		if (table->nbr_meals == 0){
+			printf("no meals (0)\n");
+			return 1;
+		}
+	}
 	table->end_dinner = false;
-	return ;
+	return 0;
 }

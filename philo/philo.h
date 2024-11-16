@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:31 by aohssine          #+#    #+#             */
-/*   Updated: 2024/09/20 22:23:19 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 12:03:47 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,9 +125,9 @@ typedef enum e_time_code
  * PROTOTYPES
  ***/
 
-void					start_dinner(t_table *table);
-void					data_init(t_table *table);
-void					init_table(t_table *table, char **av);
+int					start_dinner(t_table *table);
+int					data_init(t_table *table);
+int					init_table(t_table *table, char **av);
 
 /*
 	write status
@@ -149,7 +149,6 @@ void					safe_thread_handel(pthread_t *thr, void *(*foo)(void *),
 
 void					my_usleep(long usec, t_table *table);
 long					gettime(t_time_code tcode);
-void					error_exit(const char *error);
 void					clean(t_table *table);
 /*
 	getters_setters

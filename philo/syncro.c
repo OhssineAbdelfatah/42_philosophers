@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:37 by aohssine          #+#    #+#             */
-/*   Updated: 2024/09/20 22:25:51 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 12:05:20 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ bool	all_threads_running(t_mtx *mutex, long *threads, long philo_number)
 	bool	ret;
 
 	ret = false;
-	safe_mutex_handel(mutex, LOCK);
+	pthread_mutex_lock(mutex);
 	if (*threads == philo_number)
 		ret = true;
-	safe_mutex_handel(mutex, UNLOCK);
+	pthread_mutex_unlock(mutex);
 	return (ret);
 }

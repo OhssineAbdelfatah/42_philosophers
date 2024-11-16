@@ -6,7 +6,7 @@
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/20 22:14:06 by aohssine          #+#    #+#             */
-/*   Updated: 2024/09/20 22:16:48 by aohssine         ###   ########.fr       */
+/*   Updated: 2024/11/16 12:24:14 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,19 +19,19 @@ static void	thinking(t_philo *philo)
 
 static void	eat(t_philo *philo)
 {
-	safe_mutex_handel(&philo->first_fork->fork, LOCK);
+	pthread_mutex_lock(&philo->first_fork->fork);
 	write_status(TAKE_FIRST_FORK, philo);
-	safe_mutex_handel(&philo->second_fork->fork, LOCK);
+	pthread_mutex_lock(&philo->second_fork->fork);
 	write_status(TAKE_SECOND_FORK, philo);
-	set_long(&philo->philo_mutex, &philo->last_meal_time, gettime(MILLISEC));
-	philo->meals_counter++;
 	write_status(EATING, philo);
+	set_long(&philo->philo_mutex, &philo->last_meal_time, gettime(MILLISEC));
 	my_usleep(philo->table->time2eat, philo->table);
+	philo->meals_counter++;
 	if (philo->table->nbr_meals > 0
 		&& philo->meals_counter == philo->table->nbr_meals)
 		set_bool(&philo->philo_mutex, &philo->full, true);
-	safe_mutex_handel(&philo->first_fork->fork, UNLOCK);
-	safe_mutex_handel(&philo->second_fork->fork, UNLOCK);
+	pthread_mutex_unlock(&philo->first_fork->fork);
+	pthread_mutex_unlock(&philo->second_fork->fork);
 }
 
 void	*lone_routine(void *data)
@@ -75,26 +75,39 @@ void	*routine(void *data)
 	return (NULL);
 }
 
-void	start_dinner(t_table *table)
+int	start_dinner(t_table *table)
 {
 	int	i;
 
-	i = -1;
+	i = 0;
 	if (table->nbr_meals == 0)
-		return ;
-	else if (table->num_philo == 1)
-		safe_thread_handel(&table->philos[0].thread_id, lone_routine,
-			table->philos, CREATE);
+		return 1;
+	if (table->num_philo == 1){
+		if(pthread_create(&table->philos[0].thread_id , NULL, lone_routine, table->philos))
+			return ((free(table->philos)),(free(table->forks)), 1);
+	}
 	else
-		while (++i < table->num_philo)
-			safe_thread_handel(&table->philos[i].thread_id, routine,
-				&table->philos[i], CREATE);
-	safe_thread_handel(&table->monitor, monitor_dinner, table, CREATE);
+	{
+		while (i < table->num_philo)
+		{
+			if(pthread_create(&table->philos[i].thread_id , NULL, routine, table->philos + i))
+				return ((free(table->philos)),(free(table->forks)), 1);		
+			i++;
+		}
+	}
+	if(pthread_create(&table->monitor, NULL, monitor_dinner, table))
+		return ((free(table->philos)),(free(table->forks)), 1);
 	table->start_dinner = gettime(MILLISEC);
 	set_bool(&table->table_mtx, &table->all_thr_ready, true);
-	i = -1;
-	while (++i, table->num_philo)
-		safe_thread_handel(&table->philos[i].thread_id, NULL, NULL, JOIN);
+	i = 0;
+	while (i < table->num_philo)
+	{
+		// pthread_join(table->philos[i].thread_id, NULL);
+		pthread_detach(table->philos[i].thread_id);
+		// 	return ((free(table->philos)),(free(table->forks)), 1);
+		i++;
+	}
 	set_bool(&table->table_mtx, &table->end_dinner, true);
-	safe_thread_handel(&table->monitor, NULL, NULL, JOIN);
+	pthread_detach(table->monitor);
+	return 0;
 }
