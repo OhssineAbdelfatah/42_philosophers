@@ -5,14 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/20 22:14:28 by aohssine          #+#    #+#             */
-/*   Updated: 2024/11/16 09:24:09 by aohssine         ###   ########.fr       */
+/*   Created: 2024/11/17 14:07:10 by aohssine          #+#    #+#             */
+/*   Updated: 2024/11/17 15:30:45 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static int	ft_atoi(const char *str)
+int	ft_atoi(const char *str)
 {
 	int					i;
 	unsigned long long	result;
@@ -49,39 +49,44 @@ int	parse_input(char **input)
 	i = 0;
 	while (input[++i])
 	{
-		if (is_digit(input[i]) == -1 || ft_atoi(input[i]) == -1){
+		if (is_digit(input[i]) == -1 || ft_atoi(input[i]) == -1)
+		{
 			printf("Integer arg required\n");
-			return 1;
+			return (1);
 		}
-			
 	}
 	if (ft_atoi(input[2]) < 60 || ft_atoi(input[3]) < 60
 		|| ft_atoi(input[4]) < 60 || ft_atoi(input[1]) > 200
 		|| ft_atoi(input[1]) < 1)
 	{
 		printf("Arg not valid\n");
-		return 1;
+		return (1);
 	}
-	return 0;
+	return (0);
 }
 
-int	init_table(t_table *table, char **av)
+void	clean(t_table *table)
 {
-	if(parse_input(av))
-		return 1;
-	table->num_philo = ft_atoi(av[1]);
-	table->time2die = (long)ft_atoi(av[2]) * 1000;
-	table->time2eat = ft_atoi(av[3]) * 1000;
-	table->time2sleep = ft_atoi(av[4]) * 1000;
-	table->nbr_meals = -1;
-	if (av[5])
+	t_philo	*philo;
+	t_fork	*fork;
+	int		i;
+
+	i = 0;
+	while (i < table->num_philo)
 	{
-		table->nbr_meals = ft_atoi(av[5]);
-		if (table->nbr_meals == 0){
-			printf("no meals (0)\n");
-			return 1;
-		}
+		philo = table->philos + i;
+		pthread_mutex_destroy(&philo->philo_mutex);
+		i++;
 	}
-	table->end_dinner = false;
-	return 0;
+	i = 0 ;
+	while (i < table->num_philo)
+	{
+		fork = table->forks + i;
+		pthread_mutex_destroy(&fork->fork);
+		i++;
+	}
+	pthread_mutex_destroy(&table->table_mtx);
+	pthread_mutex_destroy(&table->write_mtx);
+	free(table->forks);
+	free(table->philos);
 }

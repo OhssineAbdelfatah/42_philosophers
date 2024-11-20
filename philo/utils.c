@@ -3,41 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: blacksniper <blacksniper@student.42.fr>    +#+  +:+       +#+        */
+/*   By: aohssine <aohssine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/20 22:14:58 by aohssine          #+#    #+#             */
-/*   Updated: 2024/11/16 11:44:42 by blacksniper      ###   ########.fr       */
+/*   Created: 2024/11/17 14:07:15 by aohssine          #+#    #+#             */
+/*   Updated: 2024/11/18 01:51:36 by aohssine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	clean(t_table *table)
+void	write_status(t_status status, t_philo *philo)
 {
-	t_philo	*philo;
-	t_fork	*fork;
-	int		i;
+	long	elapsed;
 
-	i = 0;
-	while (i < table->num_philo)
-	{
-		philo = table->philos + i;
-		pthread_mutex_destroy(&philo->philo_mutex);
-		i++;
-	}
-	i = 0 ;
-	while (i < table->num_philo)
-	{
-		fork = table->forks + i;
-		pthread_mutex_destroy(&fork->fork);
-		i++;
-	}
-	pthread_mutex_destroy(&table->table_mtx);
-	pthread_mutex_destroy(&table->write_mtx);
-	// safe_mutex_handel(&table->table_mtx, DESTROY);
-	// safe_mutex_handel(&table->write_mtx, DESTROY);
-	free(table->forks);
-	free(table->philos);
+	if (philo->full)
+		return ;
+	pthread_mutex_lock(&philo->table->write_mtx);
+	elapsed = gettime(MILLISEC) - philo->start_philo;
+	if ((status == TAKE_FIRST_FORK || status == TAKE_SECOND_FORK)
+		&& !simulation_finished(philo->table))
+		printf("%-6ld %d has taken a fork\n", elapsed, philo->id);
+	else if (EATING == status && !simulation_finished(philo->table))
+		printf("%-6ld %d is eating\n", elapsed, philo->id);
+	else if (SLEEPING == status && !simulation_finished(philo->table))
+		printf("%-6ld %d is sleeping\n", elapsed, philo->id);
+	else if (THINKING == status && !simulation_finished(philo->table))
+		printf("%-6ld %d is thinking\n", elapsed, philo->id);
+	else if (DIED == status)
+		printf("%-6ld %d DIED\n", elapsed, philo->id);
+	pthread_mutex_unlock(&philo->table->write_mtx);
 }
 
 long	gettime(t_time_code tcode)
@@ -45,7 +39,7 @@ long	gettime(t_time_code tcode)
 	struct timeval	time;
 
 	if (gettimeofday(&time, NULL))
-		return -1;
+		return (-1);
 	if (SECOND == tcode)
 		return (time.tv_usec / 1e6 + time.tv_sec);
 	else if (MILLISEC == tcode)
@@ -53,7 +47,7 @@ long	gettime(t_time_code tcode)
 	else if (MICROSEC == tcode)
 		return (time.tv_usec + time.tv_sec * 1e6);
 	else
-		return -1;
+		return (-1);
 	return (1337);
 }
 
@@ -71,7 +65,7 @@ void	my_usleep(long usec, t_table *table)
 		elapsed = gettime(MICROSEC);
 		rem = usec - elapsed;
 		if (rem > 1000)
-			usleep(100);
+			usleep(200);
 		else
 		{
 			while (gettime(MICROSEC) - start < usec)
@@ -80,9 +74,42 @@ void	my_usleep(long usec, t_table *table)
 	}
 }
 
-void	increase_long(t_mtx *mutex, long *var)
+static bool	philo_died(t_philo *philo)
 {
-	pthread_mutex_lock(mutex);
-	(*var)++;
-	pthread_mutex_unlock(mutex);
+	long	time2die;
+	long	elapsed;
+
+	elapsed = 0;
+	time2die = 0;
+	if (get_bool(&philo->table->table_mtx, &philo->full))
+		return (false);
+	elapsed = gettime(MILLISEC) - get_long(&philo->philo_mutex,
+			&philo->last_meal_time);
+	time2die = philo->table->time2die / 1000;
+	if (elapsed > time2die)
+		return (true);
+	return (false);
+}
+
+void	*monitor_dinner(void *data)
+{
+	int		i;
+	t_table	*table;
+
+	table = (t_table *)data;
+	while (!simulation_finished(table))
+	{
+		i = 0;
+		while (i < table->num_philo)
+		{
+			if (philo_died(table->philos + i))
+			{
+				set_bool(&table->table_mtx, &(table->end_dinner), true);
+				write_status(DIED, table->philos + i);
+				break ;
+			}
+			i++;
+		}
+	}
+	return (NULL);
 }
